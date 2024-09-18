@@ -1,7 +1,8 @@
 name: Update Account
 on:
-  repository_dispatch:
-    types: [trigger-action]
+  workflow_dispatch:
+  schedule:
+    - cron: "0 0 * * *" # every day
 
 jobs:
   update-account:
