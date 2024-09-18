@@ -1,0 +1,15 @@
+name: Update Asset Summary
+
+on:
+  schedule:
+    - cron: "0 0 * * *" # every day
+
+jobs:
+  daily-summary:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v2
+
+      - name: Run the summary script
+        run: python asset_summary.py

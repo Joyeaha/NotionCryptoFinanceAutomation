@@ -1,0 +1,15 @@
+name: Update Cryptocurrency Prices
+
+on:
+  schedule:
+    - cron: "0 * * * *" # every hour
+
+jobs:
+  update-prices:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v2
+
+      - name: Run the update script
+        run: python update_currency.py

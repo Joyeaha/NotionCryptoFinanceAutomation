@@ -1,0 +1,14 @@
+name: Update Account
+on:
+  repository_dispatch:
+    types: [trigger-action]
+
+jobs:
+  update-account:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v2
+
+      - name: Process Notion Changes
+        run: python update_account.py
