@@ -23,5 +23,5 @@ jobs:
         run: node update_currency.js
         env:
           NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
-          CURRENT_DATABASE_ID: ${{ secrets.CURRENT_DATABASE_ID }}
-          HISTORY_DATABASE_ID: ${{ secrets.HISTORY_DATABASE_ID }}
+          CURRENCY_CURRENT_DATABASE_ID: ${{ secrets.CURRENCY_CURRENT_DATABASE_ID }}
+          CURRENCY_HISTORY_DATABASE_ID: ${{ secrets.CURRENCY_HISTORY_DATABASE_ID }}

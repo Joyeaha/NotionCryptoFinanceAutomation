@@ -1,15 +1,26 @@
 name: Update Account
 on:
   workflow_dispatch:
-  schedule:
-    - cron: "0 0 * * *" # every day
 
 jobs:
-  update-account:
+  update-prices:
     runs-on: ubuntu-latest
     steps:
-      - name: Check out the repository
+      - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Process Notion Changes
-        run: python update_account.py
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: "14"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run update accounts script
+        run: node update_account.js
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          CURRENCY_CURRENT_DATABASE_ID: ${{ secrets.CURRENCY_CURRENT_DATABASE_ID }}
+          WALLET_DATABASE_ID: ${{ secrets.WALLET_DATABASE_ID }}
+          ACCOUNT_DATABASE_ID: ${{ secrets.ACCOUNT_DATABASE_ID }}

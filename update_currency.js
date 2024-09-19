@@ -7,12 +7,12 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const notion = new Client({ auth: process.env.NOTION_TOKEN });
-const CURRENT_DATABASE_ID = process.env.CURRENT_DATABASE_ID;
-const HISTORY_DATABASE_ID = process.env.HISTORY_DATABASE_ID;
+const CURRENCY_CURRENT_DATABASE_ID = process.env.CURRENCY_CURRENT_DATABASE_ID;
+const CURRENCY_HISTORY_DATABASE_ID = process.env.CURRENCY_HISTORY_DATABASE_ID;
 
 async function getCryptoList() {
   const response = await notion.databases.query({
-    database_id: CURRENT_DATABASE_ID,
+    database_id: CURRENCY_CURRENT_DATABASE_ID,
   });
 
   const cryptoList = response.results.map((result) => ({
@@ -59,7 +59,7 @@ async function updateCurrentDatabase(name, pageId, usdPrice, cnyPrice) {
 async function insertIntoHistoryDatabase(name, usdPrice, cnyPrice) {
   try {
     await notion.pages.create({
-      parent: { database_id: HISTORY_DATABASE_ID },
+      parent: { database_id: CURRENCY_HISTORY_DATABASE_ID },
       properties: {
         Name: {
           title: [{ text: { content: name } }],
