@@ -1,4 +1,4 @@
-name: Update Cryptocurrency Prices
+name: Update Crypto Prices
 
 on:
   schedule:
@@ -8,8 +8,20 @@ jobs:
   update-prices:
     runs-on: ubuntu-latest
     steps:
-      - name: Check out the repository
+      - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Run the update script
-        run: python update_currency.py
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: "14"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run update crypto prices script
+        run: node update_currency.js
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          CURRENT_DATABASE_ID: ${{ secrets.CURRENT_DATABASE_ID }}
+          HISTORY_DATABASE_ID: ${{ secrets.HISTORY_DATABASE_ID }}
