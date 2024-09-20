@@ -5,6 +5,7 @@ import { Client } from "@notionhq/client";
 import pLimit from "p-limit";
 
 const notion = new Client({ auth: process.env.NOTION_TOKEN });
+const TRADE_DATABASE_ID = process.env.TRADE_DATABASE_ID;
 const WALLET_DATABASE_ID = process.env.WALLET_DATABASE_ID;
 const ACCOUNT_DATABASE_ID = process.env.ACCOUNT_DATABASE_ID;
 const CURRENCY_CURRENT_DATABASE_ID = process.env.CURRENCY_CURRENT_DATABASE_ID;
@@ -16,6 +17,13 @@ async function getWalletTransactions() {
     database_id: WALLET_DATABASE_ID,
   });
   return walletResponse.results;
+}
+
+async function getTradeTransactions() {
+  const tradeResponse = await notion.databases.query({
+    database_id: TRADE_DATABASE_ID,
+  });
+  return tradeResponse.results;
 }
 
 async function getCurrencyPrices() {
@@ -76,12 +84,8 @@ async function calculateAndUpdateAccount(
   );
 }
 
-async function processWalletTransactions() {
+async function processWalletTransactions(accountAmounts) {
   const walletTransactions = await getWalletTransactions();
-  const currencyPrices = await getCurrencyPrices();
-  const allAccounts = await getAllAccounts();
-
-  const accountAmounts = {};
 
   for (const transaction of walletTransactions) {
     const action = transaction.properties.Action.select.name;
@@ -104,6 +108,47 @@ async function processWalletTransactions() {
           (accountAmounts[fromAccount] || 0) - amount;
     }
   }
+  console.log("Wallet transactions processed successfully.");
+}
+
+async function processTradeTransactions(accountAmounts) {
+  const tradeTransactions = await getTradeTransactions();
+
+  for (const trade of tradeTransactions) {
+    const action = trade.properties["IN/OUT"].select.name;
+    const baseAccount = trade.properties.Base.relation[0]?.id;
+    const assetAccount = trade.properties.Asset.relation[0]?.id;
+    const amount = trade.properties.Amount.number;
+    const fee = trade.properties.Fee?.number || 0;
+    const price = trade.properties.Price.number;
+
+    if (action === "IN") {
+      if (assetAccount)
+        accountAmounts[assetAccount] =
+          (accountAmounts[assetAccount] || 0) + (amount + fee);
+      if (baseAccount)
+        accountAmounts[baseAccount] =
+          (accountAmounts[baseAccount] || 0) - price * amount;
+    } else if (action === "OUT") {
+      if (baseAccount)
+        accountAmounts[baseAccount] =
+          (accountAmounts[baseAccount] || 0) + (price * amount + fee);
+      if (assetAccount)
+        accountAmounts[assetAccount] =
+          (accountAmounts[assetAccount] || 0) - amount;
+    }
+  }
+
+  console.log("Trade transactions processed successfully.");
+}
+
+async function main() {
+  const currencyPrices = await getCurrencyPrices();
+  const allAccounts = await getAllAccounts();
+
+  const accountAmounts = {};
+  await processWalletTransactions(accountAmounts);
+  await processTradeTransactions(accountAmounts);
 
   await Promise.all(
     allAccounts.map((account) =>
@@ -112,8 +157,7 @@ async function processWalletTransactions() {
       )
     )
   );
-
   console.log("Account database updated successfully.");
 }
 
-processWalletTransactions().catch((error) => console.error(error));
+main().catch((error) => console.error(error));
