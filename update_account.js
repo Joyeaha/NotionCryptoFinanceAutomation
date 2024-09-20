@@ -142,7 +142,7 @@ async function processTradeTransactions(accountAmounts) {
   console.log("Trade transactions processed successfully.");
 }
 
-async function main() {
+export async function updateAllAccounts() {
   const currencyPrices = await getCurrencyPrices();
   const allAccounts = await getAllAccounts();
 
@@ -160,4 +160,4 @@ async function main() {
   console.log("Account database updated successfully.");
 }
 
-main().catch((error) => console.error(error));
+updateAllAccounts().catch((error) => console.error(error));

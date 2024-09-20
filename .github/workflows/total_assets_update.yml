@@ -1,0 +1,33 @@
+name: Update Crypto Finance
+
+on:
+  schedule:
+    # 每天 UTC 时间的 00:00 触发
+    - cron: "0 0 * * *"
+
+jobs:
+  update_finance:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the repository to get access to the scripts
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # Setup Node.js environment
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "16"
+
+      # Install dependencies (you should have package.json in your repo)
+      - name: Install dependencies
+        run: npm install
+
+      # Step 1: Execute the update_account.js script
+      - name: Run update_account.js
+        run: node update_account.js
+
+      # Step 2: Execute the update_total_assets.js script after update_account.js completes
+      - name: Run update_total_assets.js
+        run: node update_total_assets.js
