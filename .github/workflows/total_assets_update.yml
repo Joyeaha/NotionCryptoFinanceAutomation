@@ -27,7 +27,18 @@ jobs:
       # Step 1: Execute the update_account.js script
       - name: Run update_account.js
         run: node update_account.js
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          CURRENCY_CURRENT_DATABASE_ID: ${{ secrets.CURRENCY_CURRENT_DATABASE_ID }}
+          WALLET_DATABASE_ID: ${{ secrets.WALLET_DATABASE_ID }}
+          ACCOUNT_DATABASE_ID: ${{ secrets.ACCOUNT_DATABASE_ID }}
+          TRADE_DATABASE_ID: ${{ secrets.TRADE_DATABASE_ID }}
 
       # Step 2: Execute the update_total_assets.js script after update_account.js completes
       - name: Run update_total_assets.js
         run: node update_total_assets.js
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          CURRENCY_CURRENT_DATABASE_ID: ${{ secrets.CURRENCY_CURRENT_DATABASE_ID }}
+          ACCOUNT_DATABASE_ID: ${{ secrets.ACCOUNT_DATABASE_ID }}
+          FINANCE_DATABASE_ID: ${{ secrets.FINANCE_DATABASE_ID }}

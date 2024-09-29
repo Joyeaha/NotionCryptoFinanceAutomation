@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  update-prices:
+  update-accounts:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -24,3 +24,4 @@ jobs:
           CURRENCY_CURRENT_DATABASE_ID: ${{ secrets.CURRENCY_CURRENT_DATABASE_ID }}
           WALLET_DATABASE_ID: ${{ secrets.WALLET_DATABASE_ID }}
           ACCOUNT_DATABASE_ID: ${{ secrets.ACCOUNT_DATABASE_ID }}
+          TRADE_DATABASE_ID: ${{ secrets.TRADE_DATABASE_ID }}
