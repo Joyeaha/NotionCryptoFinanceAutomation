@@ -92,13 +92,17 @@ async function processWalletTransactions(accountAmounts) {
     const fromAccount = transaction.properties.From.relation[0]?.id;
     const toAccount = transaction.properties.To.relation[0]?.id;
     const amount = transaction.properties.Amount.number;
+    const toAmount = transaction.properties.toAmount.number;
+    const fee = transaction.properties.Fee.relation[0]?.id;
+    const feeAmount = transaction.properties.feeAmount.number;
 
     if (action === "EXCHANGE") {
       if (fromAccount)
         accountAmounts[fromAccount] =
           (accountAmounts[fromAccount] || 0) - amount;
       if (toAccount)
-        accountAmounts[toAccount] = (accountAmounts[toAccount] || 0) + amount;
+        accountAmounts[toAccount] =
+          (accountAmounts[toAccount] || 0) + (toAmount ?? amount);
     } else if (action === "IN") {
       if (toAccount)
         accountAmounts[toAccount] = (accountAmounts[toAccount] || 0) + amount;
@@ -106,6 +110,10 @@ async function processWalletTransactions(accountAmounts) {
       if (fromAccount)
         accountAmounts[fromAccount] =
           (accountAmounts[fromAccount] || 0) - amount;
+    }
+
+    if (fee && feeAmount) {
+      accountAmounts[fee] = (accountAmounts[fee] || 0) - feeAmount;
     }
   }
   console.log("Wallet transactions processed successfully.");
@@ -119,23 +127,28 @@ async function processTradeTransactions(accountAmounts) {
     const baseAccount = trade.properties.Base.relation[0]?.id;
     const assetAccount = trade.properties.Asset.relation[0]?.id;
     const amount = trade.properties.Amount.number;
-    const fee = trade.properties.Fee?.number || 0;
+    const fee = trade.properties.Fee.relation[0]?.id;
+    const feeAmount = trade.properties.feeAmount?.number || 0;
     const price = trade.properties.Price.number;
 
     if (action === "IN") {
       if (assetAccount)
         accountAmounts[assetAccount] =
-          (accountAmounts[assetAccount] || 0) + (amount + fee);
+          (accountAmounts[assetAccount] || 0) + amount;
       if (baseAccount)
         accountAmounts[baseAccount] =
           (accountAmounts[baseAccount] || 0) - price * amount;
     } else if (action === "OUT") {
       if (baseAccount)
         accountAmounts[baseAccount] =
-          (accountAmounts[baseAccount] || 0) + (price * amount + fee);
+          (accountAmounts[baseAccount] || 0) + price * amount;
       if (assetAccount)
         accountAmounts[assetAccount] =
           (accountAmounts[assetAccount] || 0) - amount;
+    }
+
+    if (fee && feeAmount) {
+      accountAmounts[fee] = (accountAmounts[fee] || 0) + feeAmount;
     }
   }
 
