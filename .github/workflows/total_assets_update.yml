@@ -2,7 +2,6 @@ name: Update Crypto Finance
 
 on:
   schedule:
-    # 每天 UTC 时间的 00:00 触发
     - cron: "0 0 * * *"
 
 jobs:
