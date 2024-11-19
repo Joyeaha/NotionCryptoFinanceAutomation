@@ -123,32 +123,40 @@ async function processTradeTransactions(accountAmounts) {
   const tradeTransactions = await getTradeTransactions();
 
   for (const trade of tradeTransactions) {
-    const action = trade.properties["IN/OUT"].select.name;
-    const baseAccount = trade.properties.Base.relation[0]?.id;
-    const assetAccount = trade.properties.Asset.relation[0]?.id;
-    const amount = trade.properties.Amount.number;
-    const fee = trade.properties.Fee.relation[0]?.id;
-    const feeAmount = trade.properties.feeAmount?.number || 0;
-    const price = trade.properties.Price.number;
+    const baseAccount = trade.properties.Base?.relation?.[0]?.id;
+    const assetAccount = trade.properties.Asset?.relation?.[0]?.id;
+    const type = trade.properties.Type.select.name;
 
-    if (action === "IN") {
-      if (assetAccount)
-        accountAmounts[assetAccount] =
-          (accountAmounts[assetAccount] || 0) + amount;
-      if (baseAccount)
-        accountAmounts[baseAccount] =
-          (accountAmounts[baseAccount] || 0) - price * amount;
-    } else if (action === "OUT") {
-      if (baseAccount)
-        accountAmounts[baseAccount] =
-          (accountAmounts[baseAccount] || 0) + price * amount;
-      if (assetAccount)
-        accountAmounts[assetAccount] =
-          (accountAmounts[assetAccount] || 0) - amount;
-    }
+    if (type === "Spot") {
+      const action = trade.properties["Action"].select.name;
+      const amount = trade.properties.Amount.number;
+      const fee = trade.properties.fee.relation[0]?.id;
+      const feeAmount = trade.properties.feeAmount?.number || 0;
+      const price = trade.properties["Start Price"].number;
 
-    if (fee && feeAmount) {
-      accountAmounts[fee] = (accountAmounts[fee] || 0) + feeAmount;
+      if (action === "Buy") {
+        if (assetAccount)
+          accountAmounts[assetAccount] =
+            (accountAmounts[assetAccount] || 0) + amount;
+        if (baseAccount)
+          accountAmounts[baseAccount] =
+            (accountAmounts[baseAccount] || 0) - price * amount;
+      } else if (action === "Sell") {
+        if (baseAccount)
+          accountAmounts[baseAccount] =
+            (accountAmounts[baseAccount] || 0) + price * amount;
+        if (assetAccount)
+          accountAmounts[assetAccount] =
+            (accountAmounts[assetAccount] || 0) - amount;
+      }
+
+      if (fee && feeAmount) {
+        accountAmounts[fee] = (accountAmounts[fee] || 0) - feeAmount;
+      }
+    } else if (type === "Perp") {
+      const win = trade.properties.Win.number;
+      if (baseAccount)
+        accountAmounts[baseAccount] = (accountAmounts[baseAccount] || 0) + win;
     }
   }
 
